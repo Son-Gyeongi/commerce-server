@@ -25,7 +25,7 @@ public class ItemProduct extends BaseEntity {
     @JoinColumn(name = "product_id", columnDefinition = "BIGINT", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private Product product;
 
-    @Comment("상품 수량")
+    @Comment("제품의 재고를 없애는 수량 (상품 수량)")
     @Column(name = "quantity", columnDefinition = "BIGINT")
     private Long quantity;
 
