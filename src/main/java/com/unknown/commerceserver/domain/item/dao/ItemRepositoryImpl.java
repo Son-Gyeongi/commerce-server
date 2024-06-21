@@ -17,7 +17,7 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
     @Override
     public List<Item> findAllAndDeletedAtIsNull() {
         // TODO 정렬 고민, type에 따라 선택 가능 고민
-        // 삭제되지 않은 제품, TODO 제품에 수량이 있는 경우 보여줄 것
+        // 삭제되지 않은 제품(완료), TODO 제품에 수량이 있는 경우 보여줄 것
         BooleanBuilder where = new BooleanBuilder();
 
         where.and(qItem.deletedAt.isNull());
