@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 @Schema(description = "상품 내역 정보")
-public class ItemResponse {
+public class ItemDetailResponse {
     @Schema(description = "상품 테이블 고유 번호")
     private Long id;
 
@@ -24,12 +24,16 @@ public class ItemResponse {
     @Schema(description = "상품 가격")
     private BigDecimal price;
 
-    public static ItemResponse of(Item item) {
-        return ItemResponse.builder()
+    @Schema(description = "상품 정보")
+    private String info;
+
+    public static ItemDetailResponse of(Item item) {
+        return ItemDetailResponse.builder()
                 .id(item.getId())
                 .type(item.getType())
                 .name(item.getName())
                 .price(item.getPrice())
+                .info(item.getInfo())
                 .build();
     }
 }
