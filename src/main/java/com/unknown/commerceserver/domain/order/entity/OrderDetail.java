@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @SuperBuilder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class OrderItem extends BaseEntity {
+public class OrderDetail extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "order_id", columnDefinition = "BIGINT", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
@@ -42,12 +42,12 @@ public class OrderItem extends BaseEntity {
     // 연관 관계 편의 메서드
     public void addOrder(Order order) {
         this.order = order;
-        this.order.getOrderItems().add(this);
+        this.order.getOrderDetails().add(this);
     }
 
     // 연관 관계 편의 메서드
     public void addItem(Item item) {
         this.item = item;
-        this.item.getOrderItems().add(this);
+        this.item.getOrderDetails().add(this);
     }
 }

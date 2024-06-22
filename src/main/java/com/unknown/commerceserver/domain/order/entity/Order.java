@@ -1,6 +1,7 @@
 package com.unknown.commerceserver.domain.order.entity;
 
 import com.unknown.commerceserver.domain.order.enumerated.OrderStatus;
+import com.unknown.commerceserver.domain.order.util.OrderUtil;
 import com.unknown.commerceserver.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -71,5 +72,22 @@ public class Order extends BaseEntity {
 
     @OneToMany(mappedBy = "order")
     @Builder.Default
-    private List<OrderItem> orderItems = new ArrayList<>();
+    private List<OrderDetail> orderDetails = new ArrayList<>();
+
+    // orderNo 생성
+    public void genOrderNo() {
+        // 주문 접수할 때 orderNo 만든다.
+        StringBuilder orderNo = new StringBuilder();
+
+        String date = OrderUtil.date.getDate();
+        String time = OrderUtil.date.getTime();
+        String timeMillis = OrderUtil.date.getTimeMillis(getCreatedAt());
+
+        orderNo.append(date).append("-");
+        orderNo.append(time).append("-");
+        orderNo.append(timeMillis).append("-");
+        orderNo.append(this.getId());
+
+        this.orderNo = orderNo.toString();
+    }
 }
