@@ -13,9 +13,6 @@ import java.util.List;
 @Builder
 @Schema(description = "주문 요청 정보")
 public class OrderRequest {
-    @Schema(description = "주문 번호")
-    private String orderNo;
-
     @Schema(description = "주문 금액")
     private BigDecimal price;
 

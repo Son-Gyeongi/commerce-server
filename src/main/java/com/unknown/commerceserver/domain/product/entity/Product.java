@@ -39,4 +39,8 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product")
     @Builder.Default
     private List<ItemProduct> itemProducts = new ArrayList<>();
+
+    public void minusQuantity(Long quantity) {
+        this.quantity = this.quantity - quantity;
+    }
 }
