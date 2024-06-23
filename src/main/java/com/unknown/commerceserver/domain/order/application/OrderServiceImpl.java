@@ -99,6 +99,8 @@ public class OrderServiceImpl implements OrderService {
                     .price(item.getPrice())
                     .quantity(quantity)
                     .build();
+            orderDetail.addOrder(savedOrder);
+            orderDetail.addItem(item);
 
             orderDetailRepository.save(orderDetail);
         }
