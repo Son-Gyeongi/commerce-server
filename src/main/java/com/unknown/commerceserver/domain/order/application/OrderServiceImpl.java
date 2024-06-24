@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -110,12 +111,22 @@ public class OrderServiceImpl implements OrderService {
             Long itemId = orderRequest.getItemRequests().get(i).getId();
             Long quantity = orderRequest.getItemRequests().get(i).getQuantity(); // 주문된 수량
 
-            ItemProduct itemProduct = itemProductRepository.findByIdAndDeletedAtIsNull(itemId)
-                    .orElseThrow(() -> new NoSuchElementException("해당하는 제품이 없습니다."));
-            
-            // 재고 감소 (주문된 수량 * 상품의 각 제품 수량)
-            Long decreaseQuantity = quantity * itemProduct.getQuantity();
-            itemProduct.getProduct().minusQuantity(decreaseQuantity);
+            List<ItemProduct> itemProducts = itemProductRepository.findAllByItemIdAndDeletedAtIsNull(itemId);
+
+            for (int x = 0; x<itemProducts.size();x++) {
+                System.out.println(itemProducts.get(x));
+            }
+
+            if (itemProducts.isEmpty()) {
+                throw new NoSuchElementException("해당하는 제품이 없습니다.");
+            }
+
+            // 재고 감소 (주문된 수량 * 상품의 각 제품 수량) - 각 상품 당 해당하는 제품들 재고 감소
+            for (int j = 0; j < itemProducts.size(); j++) {
+                ItemProduct itemProduct = itemProducts.get(j);
+                Long decreaseQuantity = quantity * itemProduct.getQuantity();
+                itemProduct.getProduct().minusQuantity(decreaseQuantity);
+            }
         }
 
         return OrderResponse.of(savedOrder);
