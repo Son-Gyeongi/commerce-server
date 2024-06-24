@@ -1,6 +1,6 @@
 package com.unknown.commerceserver.domain.item.entity;
 
-import com.unknown.commerceserver.domain.order.entity.OrderItem;
+import com.unknown.commerceserver.domain.order.entity.OrderDetail;
 import com.unknown.commerceserver.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -42,5 +42,5 @@ public class Item extends BaseEntity {
 
     @OneToMany(mappedBy = "item")
     @Builder.Default
-    private List<OrderItem> orderItems = new ArrayList<>();
+    private List<OrderDetail> orderDetails = new ArrayList<>();
 }
