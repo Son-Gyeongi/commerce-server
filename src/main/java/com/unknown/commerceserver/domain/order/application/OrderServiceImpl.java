@@ -8,6 +8,7 @@ import com.unknown.commerceserver.domain.order.dao.OrderDetailRepository;
 import com.unknown.commerceserver.domain.order.dao.OrderRepository;
 import com.unknown.commerceserver.domain.order.dto.request.OrderRequest;
 import com.unknown.commerceserver.domain.order.dto.response.OrderResponse;
+import com.unknown.commerceserver.domain.order.dto.response.OrderedItemResponse;
 import com.unknown.commerceserver.domain.order.entity.Order;
 import com.unknown.commerceserver.domain.order.entity.OrderDetail;
 import com.unknown.commerceserver.domain.order.enumerated.OrderStatus;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -89,6 +91,7 @@ public class OrderServiceImpl implements OrderService {
         // orderNo 생성
         savedOrder.genOrderNo();
 
+        List<OrderedItemResponse> orderedItemResponses = new ArrayList<>();
         // 주문 아이템(OrderDetail) 저장
         for (int i = 0; i < orderRequest.getItemRequests().size(); i++) {
             Long itemId = orderRequest.getItemRequests().get(i).getId();
@@ -104,6 +107,9 @@ public class OrderServiceImpl implements OrderService {
             orderDetail.addItem(item);
 
             orderDetailRepository.save(orderDetail);
+
+            // 저장하면서 상품 반환 리스트까지 작성 - 수량 포함하기
+            orderedItemResponses.add(OrderedItemResponse.of(item, quantity));
         }
         
         // 저장 후에 제품 재고 감소
@@ -129,6 +135,6 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        return OrderResponse.of(savedOrder);
+        return OrderResponse.of(savedOrder, orderedItemResponses);
     }
 }

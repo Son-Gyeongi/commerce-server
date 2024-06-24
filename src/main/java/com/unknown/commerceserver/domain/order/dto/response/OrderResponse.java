@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -52,6 +53,9 @@ public class OrderResponse {
     @Schema(description = "주문 취소 사유")
     private String cancelReason;
 
+    @Schema(description = "주문한 상품 주문 정보에 포함")
+    private List<OrderedItemResponse> orderedItems;
+
     public static OrderResponse of(Order order) {
         return OrderResponse.builder()
                 .id(order.getId())
@@ -67,6 +71,26 @@ public class OrderResponse {
                 .addressDetail(order.getAddressDetail())
                 .description(order.getDescription())
                 .cancelReason(order.getCancelReason())
+                .build();
+    }
+
+    // 주문한 상품 주문 정보에 포함
+    public static OrderResponse of(Order order, List<OrderedItemResponse> orderedItems) {
+        return OrderResponse.builder()
+                .id(order.getId())
+                .orderNo(order.getOrderNo())
+                .orderStatus(order.getOrderStatus())
+                .price(order.getPrice())
+                .deliveryPrice(order.getDeliveryPrice())
+                .totalPrice(order.getTotalPrice())
+                .recipient(order.getRecipient())
+                .phone(order.getPhone())
+                .postcode(order.getPostcode())
+                .address(order.getAddress())
+                .addressDetail(order.getAddressDetail())
+                .description(order.getDescription())
+                .cancelReason(order.getCancelReason())
+                .orderedItems(orderedItems)
                 .build();
     }
 }
