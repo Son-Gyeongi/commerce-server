@@ -4,12 +4,13 @@ import com.unknown.commerceserver.domain.item.dao.ItemRepository;
 import com.unknown.commerceserver.domain.item.dto.response.ItemDetailResponse;
 import com.unknown.commerceserver.domain.item.dto.response.ItemResponse;
 import com.unknown.commerceserver.domain.item.entity.Item;
+import com.unknown.commerceserver.global.common.HttpResponse;
+import com.unknown.commerceserver.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +26,11 @@ public class ItemServiceImpl implements ItemService {
         List<ItemResponse> itemResponses = items.stream()
                 .map(item -> ItemResponse.of(item)).toList();
 
-        if (itemResponses.isEmpty())
-            throw new NoSuchElementException("등록된 상품이 없습니다.");
+        if (itemResponses.isEmpty()) {
+            BusinessException.builder()
+                    .response(HttpResponse.Fail.NOT_FOUND_ITEM)
+                    .build();
+        }
 
         return itemResponses;
     }
@@ -35,7 +39,9 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDetailResponse getItemById(Long id) {
         Item foundItem = itemRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당하는 상품이 없습니다."));
+                .orElseThrow(() -> BusinessException.builder()
+                        .response(HttpResponse.Fail.NOT_FOUND_ITEM)
+                        .build());
 
         return ItemDetailResponse.of(foundItem);
     }
