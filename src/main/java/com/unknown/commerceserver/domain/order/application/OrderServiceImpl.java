@@ -40,29 +40,8 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal requestDeliveryPrice = orderRequest.getDeliveryPrice().setScale(3);
         BigDecimal requestTotalPrice = orderRequest.getTotalPrice().setScale(3);
 
-        // 주문 금액 유효성 검사
-        BigDecimal itemTotalPrice = BigDecimal.ZERO;
-        for (int i = 0; i < orderRequest.getItemRequests().size(); i++) {
-            Long itemId = orderRequest.getItemRequests().get(i).getId();
-            Long quantity = orderRequest.getItemRequests().get(i).getQuantity();
-            Item item = itemRepository.findByIdAndDeletedAtIsNull(itemId)
-                    .orElseThrow(() -> new NoSuchElementException("해당하는 상품이 없습니다."));
-
-            // 아이템별로 제품 재고 확인
-            for (int j = 0; j < item.getItemProducts().size(); j++) {
-                ItemProduct itemProduct = item.getItemProducts().get(j);
-                Product product = itemProduct.getProduct();
-                
-                // 제품 수량 < 상품 수량
-                if (product.getQuantity() < itemProduct.getQuantity()
-                    || product.getQuantity() == 0) {
-                    throw new IllegalArgumentException("해당하는 상품은 품절이거나 수량이 부족합니다.");
-                }
-            }
-
-            // item.getPrice()*수량(quantity)
-            itemTotalPrice = itemTotalPrice.add(item.getPrice().multiply(BigDecimal.valueOf(quantity)));
-        }
+        // 주문 금액 및 재고 유효성 검사
+        BigDecimal itemTotalPrice = priceValidation(orderRequest);
 
         // 계산된 주문한 상품들 + 배송비
         BigDecimal orderTotalPrice = itemTotalPrice.add(requestDeliveryPrice);
@@ -91,8 +70,45 @@ public class OrderServiceImpl implements OrderService {
         // orderNo 생성
         savedOrder.genOrderNo();
 
+        // 주문 아이템(OrderDetail) 저장 및 응답에 반환하는 주문 아이템 저장
+        List<OrderedItemResponse> orderedItemResponses = saveAndResponseOrderedItem(orderRequest, savedOrder);
+
+        // 저장 후에 제품 재고 감소
+        productQuantityDecrease(orderRequest);
+
+        return OrderResponse.of(savedOrder, orderedItemResponses);
+    }
+
+    // 주문 금액 및 재고 유효성 검사
+    private BigDecimal priceValidation(OrderRequest orderRequest) {
+        BigDecimal itemTotalPrice = BigDecimal.ZERO;
+        for (int i = 0; i < orderRequest.getItemRequests().size(); i++) {
+            Long itemId = orderRequest.getItemRequests().get(i).getId();
+            Long quantity = orderRequest.getItemRequests().get(i).getQuantity();
+            Item item = itemRepository.findByIdAndDeletedAtIsNull(itemId)
+                    .orElseThrow(() -> new NoSuchElementException("해당하는 상품이 없습니다."));
+
+            // 아이템별로 제품 재고 확인
+            for (int j = 0; j < item.getItemProducts().size(); j++) {
+                ItemProduct itemProduct = item.getItemProducts().get(j);
+                Product product = itemProduct.getProduct();
+
+                // 제품 수량 < 상품 수량
+                if (product.getQuantity() < itemProduct.getQuantity()
+                    || product.getQuantity() == 0) {
+                    throw new IllegalArgumentException("해당하는 상품은 품절이거나 수량이 부족합니다.");
+                }
+            }
+
+            // item.getPrice()*수량(quantity)
+            itemTotalPrice = itemTotalPrice.add(item.getPrice().multiply(BigDecimal.valueOf(quantity)));
+        }
+        return itemTotalPrice;
+    }
+
+    // 주문 아이템(OrderDetail) 저장 및 응답에 반환하는 주문 아이템 저장
+    private List<OrderedItemResponse> saveAndResponseOrderedItem(OrderRequest orderRequest, Order savedOrder) {
         List<OrderedItemResponse> orderedItemResponses = new ArrayList<>();
-        // 주문 아이템(OrderDetail) 저장
         for (int i = 0; i < orderRequest.getItemRequests().size(); i++) {
             Long itemId = orderRequest.getItemRequests().get(i).getId();
             Long quantity = orderRequest.getItemRequests().get(i).getQuantity();
@@ -111,9 +127,12 @@ public class OrderServiceImpl implements OrderService {
             // 저장하면서 상품 반환 리스트까지 작성 - 수량 포함하기
             orderedItemResponses.add(OrderedItemResponse.of(item, quantity));
         }
-        
-        // 저장 후에 제품 재고 감소
-        for (int i=0;i<orderRequest.getItemRequests().size();i++) {
+        return orderedItemResponses;
+    }
+
+    // 저장 후에 제품 재고 감소
+    private void productQuantityDecrease(OrderRequest orderRequest) {
+        for (int i = 0; i< orderRequest.getItemRequests().size(); i++) {
             Long itemId = orderRequest.getItemRequests().get(i).getId();
             Long quantity = orderRequest.getItemRequests().get(i).getQuantity(); // 주문된 수량
 
@@ -134,7 +153,5 @@ public class OrderServiceImpl implements OrderService {
                 itemProduct.getProduct().minusQuantity(decreaseQuantity);
             }
         }
-
-        return OrderResponse.of(savedOrder, orderedItemResponses);
     }
 }
