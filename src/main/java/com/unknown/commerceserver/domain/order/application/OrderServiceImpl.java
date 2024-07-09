@@ -140,7 +140,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // 저장 후에 제품 재고 감소
-    private void productQuantityDecrease(OrderRequest orderRequest) {
+    @Transactional
+    public void productQuantityDecrease(OrderRequest orderRequest) {
         for (int i = 0; i< orderRequest.getItemRequests().size(); i++) {
             Long itemId = orderRequest.getItemRequests().get(i).getId();
             Long quantity = orderRequest.getItemRequests().get(i).getQuantity(); // 주문된 수량
