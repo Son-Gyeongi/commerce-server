@@ -1,11 +1,10 @@
-package com.unknown.commerceserver.domain.order.api;
+package com.unknown.commerceserver.domain.order.application;
 
 import com.unknown.commerceserver.domain.item.dao.ItemProductRepository;
 import com.unknown.commerceserver.domain.item.dao.ItemRepository;
 import com.unknown.commerceserver.domain.item.dto.request.ItemRequest;
 import com.unknown.commerceserver.domain.item.entity.Item;
 import com.unknown.commerceserver.domain.item.entity.ItemProduct;
-import com.unknown.commerceserver.domain.order.application.OrderService;
 import com.unknown.commerceserver.domain.order.dao.OrderRepository;
 import com.unknown.commerceserver.domain.order.dto.request.OrderRequest;
 import com.unknown.commerceserver.domain.product.dao.ProductRepository;
@@ -26,7 +25,7 @@ import java.util.concurrent.Executors;
 
 @SpringBootTest
 @ActiveProfiles("test") // test 실행환경일 시 application-test.yml 사용
-class OrderControllerTest {
+class OrderServiceTest {
 
     @Autowired
     private OrderService orderService;
@@ -127,7 +126,7 @@ class OrderControllerTest {
 
         // 모든 요청이 완료된다면 productRepository를 활용해서 남은 재고(quantity)를 가지고 와서 비교
         Product product = productRepository.findByIdAndDeletedAtIsNull(1L).get();
-        System.out.println("product.getQuantity() = " + product.getQuantity());
+
         // 예상 동작 - 처음에 100개 저장하고 1개씩 100번 감소해서 0개가 될 것이다.
         Assertions.assertEquals(0L, product.getQuantity());
     }
