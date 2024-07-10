@@ -39,18 +39,43 @@ public class NotProd {
             }
 
             initItem();
-            initProduct();
-            initItemProduct();
+//            initProduct();
+//            initItemProduct();
         };
     }
 
     public void initItem() {
-        itemRepository.save(Item.builder().type("식품").name("삼양라면 5개입 2봉지").price(BigDecimal.valueOf(5_000L)).info("맛있는 삼양라면 5개입 2봉지 팝니다.").build()); // 하나에 2,500원
-        itemRepository.save(Item.builder().type("식품").name("짜파게티 5개입 3봉지").price(BigDecimal.valueOf(7_500L)).info("맛있는 짜파게티 5개입 3봉지 팝니다.").build()); // 하나에 2,500원
-        itemRepository.save(Item.builder().type("식품").name("삼양라면 5개입 1봉지, 신라면 5개입 1봉지 총 2봉지").price(BigDecimal.valueOf(4_500L)).info("맛있는 삼양라면 5개입, 신라면 5개입 각 1봉지씩 총 2봉지 팝니다.").build()); // 하나에 2,000원
+        //initItem
+        Item item1 = itemRepository.save(Item.builder().type("식품").name("삼양라면 5개입 2봉지").price(BigDecimal.valueOf(5_000L)).info("맛있는 삼양라면 5개입 2봉지 팝니다.").build());// 하나에 2,500원
+        Item item2 = itemRepository.save(Item.builder().type("식품").name("짜파게티 5개입 3봉지").price(BigDecimal.valueOf(7_500L)).info("맛있는 짜파게티 5개입 3봉지 팝니다.").build());// 하나에 2,500원
+        Item item3 = itemRepository.save(Item.builder().type("식품").name("삼양라면 5개입 1봉지, 신라면 5개입 1봉지 총 2봉지").price(BigDecimal.valueOf(4_500L)).info("맛있는 삼양라면 5개입, 신라면 5개입 각 1봉지씩 총 2봉지 팝니다.").build());// 하나에 2,000원
 
-        itemRepository.save(Item.builder().type("의류").name("검은색 반팔 2개").price(BigDecimal.valueOf(25_000L)).info("여름에 시원하게 입을 수 있는 검은색 반팔 팝니다.").build()); // 하나에 12,500원
-        itemRepository.save(Item.builder().type("의류").name("긴팔 흰 셔츠, 청바지 각 1개씩 세트").price(BigDecimal.valueOf(45_000L)).info("긴팔 흰 셔츠와 청바지 세트 팝니다.").build()); // 셔츠 20,000원, 청바지 25,000원
+        Item item4 = itemRepository.save(Item.builder().type("의류").name("검은색 반팔 2개").price(BigDecimal.valueOf(25_000L)).info("여름에 시원하게 입을 수 있는 검은색 반팔 팝니다.").build());// 하나에 12,500원
+        Item item5 = itemRepository.save(Item.builder().type("의류").name("긴팔 흰 셔츠, 청바지 각 1개씩 세트").price(BigDecimal.valueOf(45_000L)).info("긴팔 흰 셔츠와 청바지 세트 팝니다.").build());// 셔츠 20,000원, 청바지 25,000원
+
+        // initProduct
+        Product product1 = productRepository.save(Product.builder().type("식품").name("삼양라면 5개입").price(BigDecimal.valueOf(2_500L)).quantity(30L).build());
+        Product product2 = productRepository.save(Product.builder().type("식품").name("짜파게티 5개입").price(BigDecimal.valueOf(2_500L)).quantity(20L).build());
+        Product product3 = productRepository.save(Product.builder().type("식품").name("신라면 5개입").price(BigDecimal.valueOf(2_000L)).quantity(25L).build());
+
+        Product product4 = productRepository.save(Product.builder().type("의류").name("검은색 반팔").price(BigDecimal.valueOf(12_500L)).quantity(100L).build());
+        Product product5 = productRepository.save(Product.builder().type("의류").name("긴팔 흰 셔츠").price(BigDecimal.valueOf(20_000L)).quantity(150L).build());
+        Product product6 = productRepository.save(Product.builder().type("의류").name("청바지").price(BigDecimal.valueOf(25_000L)).quantity(150L).build());
+
+        // initItemProduct
+        // 삼양라면 5개입 2봉지
+        itemProductRepository.save(ItemProduct.builder().item(item1).product(product1).quantity(2L).build());
+        // 짜파게티 5개입 3봉지
+        itemProductRepository.save(ItemProduct.builder().item(item2).product(product2).quantity(3L).build());
+        // 삼양라면 5개입 1봉지, 신라면 5개입 1봉지 총 2봉지
+        itemProductRepository.save(ItemProduct.builder().item(item3).product(product1).quantity(1L).build());
+        itemProductRepository.save(ItemProduct.builder().item(item3).product(product3).quantity(1L).build());
+
+        // 검은색 반팔 2개
+        itemProductRepository.save(ItemProduct.builder().item(item4).product(product4).quantity(2L).build());
+        // 긴팔 흰 셔츠, 청바지 각 1개씩 세트
+        itemProductRepository.save(ItemProduct.builder().item(item5).product(product5).quantity(1L).build());
+        itemProductRepository.save(ItemProduct.builder().item(item5).product(product6).quantity(1L).build());
     }
 
     public void initProduct() {

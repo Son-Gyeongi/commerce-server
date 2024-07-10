@@ -38,6 +38,7 @@ out/
 
 ### Custom ###
 application-secret.yml
+application-test.yml
 
 ### Q 클래스 ###
 src/main/generated

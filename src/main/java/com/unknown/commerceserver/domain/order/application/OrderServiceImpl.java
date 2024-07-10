@@ -83,6 +83,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // 주문 금액 및 재고 유효성 검사
+//    @Transactional
     private BigDecimal priceAndQuantityValidation(OrderRequest orderRequest) {
         BigDecimal itemTotalPrice = BigDecimal.ZERO;
         for (int i = 0; i < orderRequest.getItemRequests().size(); i++) {
@@ -114,6 +115,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // 주문 아이템(OrderDetail) 저장 및 응답에 반환하는 주문 아이템 저장
+//    @Transactional
     private List<OrderedItemResponse> saveAndResponseOrderedItem(OrderRequest orderRequest, Order savedOrder) {
         List<OrderedItemResponse> orderedItemResponses = new ArrayList<>();
         for (int i = 0; i < orderRequest.getItemRequests().size(); i++) {
@@ -140,16 +142,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // 저장 후에 제품 재고 감소
+//    @Transactional
     private void productQuantityDecrease(OrderRequest orderRequest) {
         for (int i = 0; i< orderRequest.getItemRequests().size(); i++) {
             Long itemId = orderRequest.getItemRequests().get(i).getId();
             Long quantity = orderRequest.getItemRequests().get(i).getQuantity(); // 주문된 수량
 
             List<ItemProduct> itemProducts = itemProductRepository.findAllByItemIdAndDeletedAtIsNull(itemId);
-
-            for (int x = 0; x<itemProducts.size();x++) {
-                System.out.println(itemProducts.get(x));
-            }
 
             if (itemProducts.isEmpty()) {
                 BusinessException.builder()
