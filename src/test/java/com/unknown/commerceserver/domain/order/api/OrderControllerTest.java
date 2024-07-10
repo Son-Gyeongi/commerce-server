@@ -44,36 +44,39 @@ class OrderControllerTest {
     // 테스트가 실행되기 전에 데이터를 생성
     @BeforeEach
     public void before() {
-        itemRepository.saveAndFlush(Item.builder()
+        Item item = itemRepository.saveAndFlush(Item.builder()
                 .type("식품")
                 .name("삼양라면 1봉지")
                 .price(BigDecimal.valueOf(2500))
                 .info("맛있는 삼양라면")
                 .build());
+        Item savedItem = itemRepository.save(item);// Item 저장
 
-        productRepository.saveAndFlush(Product.builder()
+        Product product = productRepository.saveAndFlush(Product.builder()
                 .type("식품")
                 .name("삼양라면 1봉지(5개입)")
                 .price(BigDecimal.valueOf(2500))
                 .quantity(100L) // 제품 재고 수량 100개
                 .build());
+        Product savedProduct = productRepository.save(product);// Product 저장
 
-        itemProductRepository.saveAndFlush(ItemProduct.builder()
-                .item(itemRepository.findByIdAndDeletedAtIsNull(1L).get())
-                .product(productRepository.findByIdAndDeletedAtIsNull(1L).get())
+        ItemProduct itemProduct = itemProductRepository.saveAndFlush(ItemProduct.builder()
+                .item(savedItem)
+                .product(savedProduct)
                 .quantity(1L) // 상품(Item) : 삼양라면 1봉지
                 .build());
+        itemProductRepository.save(itemProduct);// ItemProduct 저장
     }
 
     // 테스트 케이스가 종료되면 모든 상품(Item)을 삭제
     @AfterEach
     public void after() {
+        itemProductRepository.deleteAll(); // item, product 보다 먼저 데이터 삭제 해야함
         itemRepository.deleteAll();
         productRepository.deleteAll();
-        itemProductRepository.deleteAll();
     }
 
-    // TODO 테스트 데이터베이스 새롭게 만들어야 할듯
+//    @Transactional
     @Test
     public void 동시에_100개_요청() throws InterruptedException {
         // 동시에 여러 개의 요청을 보내기 위해 멀티 쓰레드 사용
@@ -81,6 +84,7 @@ class OrderControllerTest {
 
         // 멀티스레드를 이용해야 하기 때문에 ExecutorService 사용
         // ExecutorService 는 비동기로 실행하는 작업을 단순화하여 사용할 수 있게 도와주는 자바의 API
+        // 32개의 스레드로 구성된 스레드 풀을 생성
         ExecutorService executorService = Executors.newFixedThreadPool(32);
 
         // 100개 요청이 끝날 때까지 기다려야 함으로 CountDownLatch 활용
@@ -112,7 +116,6 @@ class OrderControllerTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    // TODO orderRequest 만들기
                     orderService.createOrder(orderRequest);
                 } finally {
                     latch.countDown();
@@ -123,7 +126,8 @@ class OrderControllerTest {
         latch.await();
 
         // 모든 요청이 완료된다면 productRepository를 활용해서 남은 재고(quantity)를 가지고 와서 비교
-        Product product = productRepository.findByIdAndDeletedAtIsNull(1L).orElseThrow();
+        Product product = productRepository.findByIdAndDeletedAtIsNull(1L).get();
+        System.out.println("product.getQuantity() = " + product.getQuantity());
         // 예상 동작 - 처음에 100개 저장하고 1개씩 100번 감소해서 0개가 될 것이다.
         Assertions.assertEquals(0L, product.getQuantity());
     }
