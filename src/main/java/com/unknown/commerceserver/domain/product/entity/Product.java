@@ -41,6 +41,6 @@ public class Product extends BaseEntity {
     private List<ItemProduct> itemProducts = new ArrayList<>();
 
     public void minusQuantity(Long quantity) {
-        this.quantity = this.quantity - quantity;
+        this.quantity -= quantity;
     }
 }
