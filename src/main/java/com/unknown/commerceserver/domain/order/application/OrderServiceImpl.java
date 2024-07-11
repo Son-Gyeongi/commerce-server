@@ -12,6 +12,7 @@ import com.unknown.commerceserver.domain.order.dto.response.OrderedItemResponse;
 import com.unknown.commerceserver.domain.order.entity.Order;
 import com.unknown.commerceserver.domain.order.entity.OrderDetail;
 import com.unknown.commerceserver.domain.order.enumerated.OrderStatus;
+import com.unknown.commerceserver.domain.product.dao.ProductRepository;
 import com.unknown.commerceserver.domain.product.entity.Product;
 import com.unknown.commerceserver.global.common.HttpResponse;
 import com.unknown.commerceserver.global.exception.BusinessException;
@@ -25,12 +26,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+//@Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ItemRepository itemRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final ItemProductRepository itemProductRepository;
+    private final ProductRepository productRepository;
 
     // 주문 완료
     @Override
@@ -48,7 +50,7 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal orderTotalPrice = itemTotalPrice.add(requestDeliveryPrice);
         // 주문 금액(서버) == 상품 총금액(요청) || 주문 금액 + 배송 금액(서버) == 전체 금액(요청) 확인하기
         if (!itemTotalPrice.equals(requestPrice)
-            || !orderTotalPrice.equals(requestTotalPrice)) {
+                || !orderTotalPrice.equals(requestTotalPrice)) {
             BusinessException.builder()
                     .response(HttpResponse.Fail.BAD_REQUEST_PRICE)
                     .build();
@@ -101,7 +103,7 @@ public class OrderServiceImpl implements OrderService {
 
                 // 제품 수량 < 상품 수량
                 if (product.getQuantity() < itemProduct.getQuantity()
-                    || product.getQuantity() == 0) {
+                        || product.getQuantity() == 0) {
                     BusinessException.builder()
                             .response(HttpResponse.Fail.BAD_REQUEST_QUANTITY)
                             .build();
@@ -141,6 +143,7 @@ public class OrderServiceImpl implements OrderService {
         return orderedItemResponses;
     }
 
+
     // 저장 후에 제품 재고 감소
 //    @Transactional
     private void productQuantityDecrease(OrderRequest orderRequest) {
@@ -160,7 +163,15 @@ public class OrderServiceImpl implements OrderService {
             for (int j = 0; j < itemProducts.size(); j++) {
                 ItemProduct itemProduct = itemProducts.get(j);
                 Long decreaseQuantity = quantity * itemProduct.getQuantity();
-                itemProduct.getProduct().minusQuantity(decreaseQuantity);
+
+                Long productId = itemProducts.get(j).getProduct().getId();
+                Product product = productRepository.findByIdAndDeletedAtIsNullForUpdate(productId)
+                        .orElseThrow(() -> BusinessException.builder()
+                                .response(HttpResponse.Fail.NOT_FOUND_PRODUCT)
+                                .build());
+
+                product.minusQuantity(decreaseQuantity);
+                productRepository.save(product);
             }
         }
     }

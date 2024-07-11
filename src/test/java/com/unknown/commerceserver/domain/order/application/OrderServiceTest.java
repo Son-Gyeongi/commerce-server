@@ -7,6 +7,7 @@ import com.unknown.commerceserver.domain.item.entity.Item;
 import com.unknown.commerceserver.domain.item.entity.ItemProduct;
 import com.unknown.commerceserver.domain.order.dao.OrderRepository;
 import com.unknown.commerceserver.domain.order.dto.request.OrderRequest;
+import com.unknown.commerceserver.domain.order.dto.request.ProductRequest;
 import com.unknown.commerceserver.domain.product.dao.ProductRepository;
 import com.unknown.commerceserver.domain.product.entity.Product;
 import org.junit.jupiter.api.AfterEach;
@@ -91,10 +92,16 @@ class OrderServiceTest {
         CountDownLatch latch = new CountDownLatch(threadCount);
 
         // 주문에 필요한 데이터 생성
+        // 상품에 포함되는 제품번호
+        ProductRequest productRequest = ProductRequest.builder()
+                .id(1L)
+                .build();
+
         // 주문할 상품 정보와 주문할 상품 수량
         ItemRequest itemRequest = ItemRequest.builder()
                 .id(1L)
                 .quantity(1L)
+                .productRequests(List.of(productRequest))
                 .build();
 
         // 주문 정보

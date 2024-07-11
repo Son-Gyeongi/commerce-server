@@ -1,7 +1,10 @@
 package com.unknown.commerceserver.domain.item.dto.request;
 
+import com.unknown.commerceserver.domain.order.dto.request.ProductRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -14,4 +17,7 @@ public class ItemRequest {
 
     @Schema(description = "주문한 상품 수량")
     private Long quantity;
+
+    @Schema(description = "상품의 제품들")
+    private List<ProductRequest> productRequests;
 }
